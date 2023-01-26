@@ -2,7 +2,11 @@
   "name": "@basedash/dockscan",
   "version": "1.0.0",
   "description": "Scans which apps you have in your macOS dock and shares the result with Dockhunt",
+  "os": [
+    "darwin"
+  ],
   "main": "index.js",
+  "bin": "./cli.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
