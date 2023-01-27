@@ -6,34 +6,41 @@ function logWithInspect(object) {
   console.log(util.inspect(object, { depth: null, colors: true }));
 }
 
+function getAppData(parsedDockData) {
+  const parsedAppData = parsedDockData.plist.dict[0]
+
+  //logWithInspect(parsedAppData);
+
+  const persistentApps = parsedAppData.array[1].dict;
+  const _persistentOthers = parsedAppData.array[2].dict;
+  const _recentApps = parsedAppData.array[3].dict;
+
+  const result = [];
+
+  for (const parsedAppData of persistentApps) {
+    const appName = parsedAppData.dict[0].string[1];
+    const appDirectory = parsedAppData.dict[0].dict[0].string[0];
+    result.push({
+      appName,
+      appDirectory,
+    });
+  }
+  return result;
+}
+
 function getDockContents(dockXmlPlist) {
-  xml2js.parseStringPromise(dockXmlPlist).then(function (rawDockData) {
-    // TODO: Ensure XML is valid apple p-list
-    const rawAppData = rawDockData.plist.dict[0]
+  if (!dockXmlPlist.match(/<!DOCTYPE plist/g)) {
+    throw 'Dock data appears to be invalid. Expected: Apple plist XML.';
+  }
 
-    //logWithInspect(appData);
-
-    const persistentApps = rawAppData.array[1].dict;
-    const _persistentOthers = rawAppData.array[2].dict;
-    const _recentApps = rawAppData.array[3].dict;
-
-    const appData = [];
-
-    for (const rawAppData of persistentApps) {
-      const appName = rawAppData.dict[0].string[1];
-      const appDirectory = rawAppData.dict[0].dict[0].string[0];
-      appData.push({
-        appName,
-        appDirectory,
-      });
-    }
-
+  xml2js.parseStringPromise(dockXmlPlist).then(function (parsedDockData) {
     console.log('Found the following persistent apps:')
+    const appData = getAppData(parsedDockData);
     logWithInspect(appData);
 
   })
   .catch(function (error) {
-    console.error('Problem parsing XML p-list');
+    console.error('Problem parsing XML plist');
     console.error(error);
   });
 }
