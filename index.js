@@ -1,5 +1,7 @@
 import util from 'util';
+import querystring from 'querystring';
 
+import fetch from 'node-fetch';
 import { parseString } from 'xml2js';
 
 
@@ -30,6 +32,16 @@ function getAppData(parsedDockData) {
   return result;
 }
 
+export async function checkApps(appNames) {
+  const queryString = querystring.stringify({ app: appNames });
+  const url = `https://www.dockhunt.com/api/cli/check-apps?${queryString}`;
+
+  const response = await fetch(url);
+  const result = await response.json();
+  console.log('And of those, our server does not yet know about the following...');
+  console.log(result);
+}
+
 export async function getDockContents(dockXmlPlist) {
   if (!dockXmlPlist.match(/<!DOCTYPE plist/g)) {
     throw 'Dock data appears to be invalid. Expected: Apple plist XML.';
@@ -42,6 +54,8 @@ export async function getDockContents(dockXmlPlist) {
   });
 
   const appData = getAppData(parsedDockData);
-  console.log('Found the following persistent apps:')
+  console.log('Found the following persistent apps in your dock:')
   logWithInspect(appData);
+
+  await checkApps(appData.map((app) => app.appName));
 }
