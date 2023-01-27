@@ -34,8 +34,8 @@ function getDockContents(dockXmlPlist) {
   }
 
   xml2js.parseStringPromise(dockXmlPlist).then(function (parsedDockData) {
-    const appData = getAppData(parsedDockData);
     console.log('Found the following persistent apps:')
+    const appData = getAppData(parsedDockData);
     logWithInspect(appData);
 
   })
@@ -43,7 +43,6 @@ function getDockContents(dockXmlPlist) {
     console.error('Problem parsing XML plist');
     console.error(error);
   });
-
 }
 
 module.exports = getDockContents;
