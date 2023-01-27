@@ -1,3 +1,5 @@
+import child_process from 'child_process';
+
 import fs from 'fs';
 import path from 'path';
 import querystring from 'querystring';
@@ -107,8 +109,10 @@ export async function getDockContents(dockXmlPlist) {
     }
   });
 
-  // Remove the temporary dir
-  //fs.remove(tempDir);
+  // TODO: Await exit of all sips processes. Then we can cleanup (remove the
+  // temporary dir), output a status message that all the work is done, and say
+  // good bye.
+  child_process.exec(`open '${tempDir}'`);
 
   console.log();
 }
