@@ -1,7 +1,7 @@
 {
-  "name": "@basedash/dockscan",
+  "name": "dockhunt",
   "version": "1.0.0",
-  "description": "Scans which apps you have in your macOS dock and shares the result with Dockhunt",
+  "description": "Share which apps you have in your macOS dock with Dockhunt.",
   "os": [
     "darwin"
   ],
@@ -12,12 +12,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Basedash/dockscan.git"
+    "url": "git+https://github.com/Basedash/dockhunt-cli.git"
   },
   "author": "Basedash engineering",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Basedash/dockscan/issues"
+    "url": "https://github.com/Basedash/dockhunt-cli/issues"
   },
-  "homepage": "https://github.com/Basedash/dockscan#readme"
+  "homepage": "https://github.com/Basedash/dockhunt-cli#readme"
 }
