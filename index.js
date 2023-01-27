@@ -7,6 +7,8 @@ import util from 'util';
 import fetch from 'node-fetch';
 import { parseString } from 'xml2js';
 
+import { icns2png } from './icns2png.js';
+
 
 function logWithInspect(object) {
   // https://stackoverflow.com/a/10729284/15487978
@@ -86,12 +88,27 @@ export async function getDockContents(dockXmlPlist) {
     Object.keys(appNamesToIconPaths)
   );
   console.log('Of these, the following will be uploaded:');
+  console.log(appNamesNeedingIconsUploaded);
 
-  const appNamesToIconPathsNeedingUpload = {};
+
+  // Make a temporary dir for converted images
+  const tempDirname = `temp_${Date.now()}_icon_conversion`;
+  const tempDir = path.join(path.dirname(url.fileURLToPath(import.meta.url)), tempDirname);
+  console.log('Creating temporary directory for converted icons:\n', tempDir, '\n');
+  fs.mkdirSync(tempDir);
+
   appNamesNeedingIconsUploaded.forEach((appName) => {
-    appNamesToIconPathsNeedingUpload[appName] = appNamesToIconPaths[appName];
-    console.log([appName, appNamesToIconPaths[appName]]);
+    const iconPath = appNamesToIconPaths[appName];
+    if (iconPath) {
+      icns2png(appName, iconPath, tempDir);
+    } else {
+      //console.warn('No icon found for app:', appName);
+      console.warn(`No icon found          (${appName})`);
+    }
   });
+
+  // Remove the temporary dir
+  //fs.remove(tempDir);
 
   console.log();
 }
