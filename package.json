@@ -1,15 +1,16 @@
 {
   "name": "dockhunt",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "Share which apps you have in your macOS dock with Dockhunt.",
   "os": [
     "darwin"
   ],
   "main": "index.js",
   "bin": "./cli.sh",
-  "files": [
-    "./share-dock.js"
-  ],
+  "bin": {
+    "dockhunt": "./cli.sh",
+    "share-dock": "./share-dock.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
