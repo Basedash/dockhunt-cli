@@ -1,7 +1,7 @@
-function scan() {
-  console.log('Scanning your dock to send to Dockhunt...');
+function getDockContents(dockXmlPlist) {
+  console.log('Your dock contents:')
 
-  return 'Not yet implemented. Good day.';
+  console.log(dockXmlPlist);
 }
 
-module.exports = scan;
+module.exports = getDockContents;

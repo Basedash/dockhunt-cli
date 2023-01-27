@@ -6,7 +6,7 @@
     "darwin"
   ],
   "main": "index.js",
-  "bin": "./cli.js",
+  "bin": "./cli.sh",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
