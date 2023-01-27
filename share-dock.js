@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
+import { getDockContents } from './index.js';
 
-const getDockContents = require('./');
-
-
-const dockInfo = fs.readFileSync(0).toString();
-
-getDockContents(dockInfo);
+process.stdin.on("data", data => {
+  getDockContents(data.toString());
+})

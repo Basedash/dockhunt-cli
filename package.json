@@ -5,6 +5,7 @@
   "os": [
     "darwin"
   ],
+  "type": "module",
   "main": "index.js",
   "bin": {
     "dockhunt": "./cli.sh",

@@ -1,5 +1,7 @@
-var xml2js = require('xml2js');
-const util = require('util')
+import util from 'util';
+
+import { parseString } from 'xml2js';
+
 
 function logWithInspect(object) {
   // https://stackoverflow.com/a/10729284/15487978
@@ -28,21 +30,18 @@ function getAppData(parsedDockData) {
   return result;
 }
 
-function getDockContents(dockXmlPlist) {
+export async function getDockContents(dockXmlPlist) {
   if (!dockXmlPlist.match(/<!DOCTYPE plist/g)) {
     throw 'Dock data appears to be invalid. Expected: Apple plist XML.';
   }
 
-  xml2js.parseStringPromise(dockXmlPlist).then(function (parsedDockData) {
-    console.log('Found the following persistent apps:')
-    const appData = getAppData(parsedDockData);
-    logWithInspect(appData);
-
-  })
-  .catch(function (error) {
-    console.error('Problem parsing XML plist');
-    console.error(error);
+  const parsedDockData = await new Promise((resolve, reject) => {
+    parseString(dockXmlPlist, function (error, result) {
+      return error ? reject(error) : resolve(result);
+    });
   });
-}
 
-module.exports = getDockContents;
+  const appData = getAppData(parsedDockData);
+  console.log('Found the following persistent apps:')
+  logWithInspect(appData);
+}
