@@ -12,7 +12,7 @@ npx dockhunt
 ## What does it do?
 1. Scan your macOS dock
    - For each app, find its name and the path to its icon file
-     - Using `defaults export com.apple.dock persistent-apps`
+     - Using `defaults export com.apple.dock -` (see `defaults help`)
    - Convert each icon file from `ICNS` to `PNG`
    - Upload the app names and PNGs to the Dockhunt server
 2. Open the Dockhunt website in your browser

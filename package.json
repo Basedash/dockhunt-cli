@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/Basedash/dockhunt-cli/issues"
   },
-  "homepage": "https://github.com/Basedash/dockhunt-cli#readme"
+  "homepage": "https://github.com/Basedash/dockhunt-cli#readme",
+  "dependencies": {
+    "xml2js": "^0.4.23"
+  }
 }
