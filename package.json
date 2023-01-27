@@ -6,7 +6,6 @@
     "darwin"
   ],
   "main": "index.js",
-  "bin": "./cli.sh",
   "bin": {
     "dockhunt": "./cli.sh",
     "share-dock": "./share-dock.js"
@@ -25,6 +24,7 @@
   },
   "homepage": "https://github.com/Basedash/dockhunt-cli#readme",
   "dependencies": {
+    "node-fetch": "^3.3.0",
     "xml2js": "^0.4.23"
   }
 }
