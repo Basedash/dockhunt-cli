@@ -7,6 +7,9 @@
   ],
   "main": "index.js",
   "bin": "./cli.sh",
+  "files": [
+    "./share-dock.js"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
