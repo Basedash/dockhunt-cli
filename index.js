@@ -1,4 +1,3 @@
-import child_process from 'child_process';
 import fetch, {FormData, fileFrom} from 'node-fetch';
 import open from 'open';
 
@@ -50,16 +49,22 @@ function getAppNamesToIconPaths(parsedDockData) {
     return result;
 }
 
-async function getWhichAppNamesNeedIconsUploaded(appNames) {
+/**
+ *
+ * @param appNames
+ * @returns {Promise<Array.<{name: string; foundInDb: boolean; missingAppIcon: boolean}>>}
+ */
+async function getWhichAppsAreMissingFromDatabase(appNames) {
     const queryString = querystring.stringify({app: appNames});
     const url = `https://www.dockhunt.com/api/cli/check-apps?${queryString}`;
+    // const url = `http://localhost:3000/api/cli/check-apps?${queryString}`;
 
     const response = await fetch(url);
     if (!response.ok) {
         throw 'Bad response from Dockhunt `check-apps` endpoint';
     }
     const payload = await response.json();
-    return payload.appsMissingIcon;
+    return payload.missingAppsInformation;
 }
 
 function getIconPath(appDirectory) {
@@ -73,23 +78,29 @@ function getIconPath(appDirectory) {
     return null;
 }
 
-const uploadIcon = async (appName, iconPath) => {
-    console.log("Uploading icon for app:", appName);
+/**
+ *
+ * @param appName {string}
+ * @param iconPath {string | null}
+ * @returns {Promise<void>}
+ */
+const addAppToDatabase = async (appName, iconPath) => {
     const URL = 'https://dockhunt.com/api/cli/icon-upload';
+    // const URL = 'http://localhost:3000/api/cli/icon-upload';
 
     const form = new FormData();
 
     form.append('app', appName);
-    form.append('icon', await fileFrom(iconPath));
+    if (iconPath !== null) {
+        form.append('icon', await fileFrom(iconPath));
+    }
 
     const response = await fetch(URL, {
         method: 'POST',
         body: form,
     });
 
-    const data = await response.json()
-
-    console.log("Uploaded icon for app:", appName);
+    await response.json()
 }
 
 export async function getDockContents(dockXmlPlist) {
@@ -110,14 +121,11 @@ export async function getDockContents(dockXmlPlist) {
         console.log(`•  ${name}`);
     }
 
-    console.log('\nUploading missing dock icons to dockhunt...');
+    // console.log('\nUploading missing dock icons to dockhunt...');
 
-    const appNamesNeedingIconsUploaded = await getWhichAppNamesNeedIconsUploaded(
+    const missingAppInformation = await getWhichAppsAreMissingFromDatabase(
         appNames
     );
-    for (const name of appNamesNeedingIconsUploaded) {
-        console.log(`•  ${name}`);
-    }
 
 
     // Make a temporary dir for converted images
@@ -125,30 +133,29 @@ export async function getDockContents(dockXmlPlist) {
     const tempDir = path.join(path.dirname(url.fileURLToPath(import.meta.url)), tempDirname);
     fs.mkdirSync(tempDir);
 
-    const appIconsBeingUploadedPromises = [];
+    /** @type {Promise<{iconPath: string | null, appName: string}>[]} */
+    const missingAppsToBeAddedToDatabasePromises = [];
 
-    for (const appName of appNamesNeedingIconsUploaded) {
-        const iconPath = appNamesToIconPaths[appName];
+    for (const app of missingAppInformation) {
+        const iconPath = appNamesToIconPaths[app.name];
+        if (!iconPath) {
+            console.warn(`\n${app.name} icon not found.`);
+        }
         if (iconPath) {
-            appIconsBeingUploadedPromises.push(icns2png(appName, iconPath, tempDir));
-        } else {
-            console.warn(`No icon found          (${appName})`);
+            missingAppsToBeAddedToDatabasePromises.push(icns2png(app.name, iconPath, tempDir));
+        } else if (!iconPath && !app.foundInDb) {
+            // We still want to upload apps to our database if they don't have an icon AND are not in our database
+            missingAppsToBeAddedToDatabasePromises.push(new Promise((resolve) => resolve({iconPath: null, appName: app.name})));
         }
     }
 
     try {
-        const appIconsUploaded = await Promise.all(appIconsBeingUploadedPromises);
+        const missingAppsToBeAddedToDatabase = await Promise.all(missingAppsToBeAddedToDatabasePromises);
 
-        if (appIconsUploaded.length > 0) {
-            console.log('\nConverted icons to pngs:\n');
-            for (const appIconUploaded of appIconsUploaded) {
-                console.log(`•  ${appIconUploaded.appName}`);
-            }
-        }
-
+        /** @type {Promise<void>[]} */
         const appIconUploadPromises = [];
-        for (const appIcon of appIconsUploaded) {
-            appIconUploadPromises.push(uploadIcon(appIcon.appName, appIcon.iconPath));
+        for (const app of missingAppsToBeAddedToDatabase) {
+            appIconUploadPromises.push(addAppToDatabase(app.appName, app.iconPath));
         }
 
         // Wait for all uploads to complete
@@ -161,8 +168,9 @@ export async function getDockContents(dockXmlPlist) {
         console.log('\nDock scan complete!');
 
         const dockhuntUrl = `https://dockhunt.com/new-dock?${appNames.map(appName => `app=${encodeURIComponent(appName)}`).join('&')}`;
+        // const dockhuntUrl = `http://localhost:3000/new-dock?${appNames.map(appName => `app=${encodeURIComponent(appName)}`).join('&')}`;
         console.log(`\nRedirecting to dockhunt (${dockhuntUrl})`);
-        await open(dockhuntUrl);
+        // await open(dockhuntUrl);
     } catch (error) {
         console.error("Error converting icons to pngs:", error);
     }
