@@ -1,6 +1,6 @@
 {
   "name": "dockhunt",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Share which apps you have in your macOS dock with Dockhunt.",
   "os": [
     "darwin"
