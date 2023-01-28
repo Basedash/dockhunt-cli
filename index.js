@@ -1,5 +1,6 @@
 import child_process from 'child_process';
 import fetch, {FormData, fileFrom} from 'node-fetch';
+import open from 'open';
 
 import fs from 'fs-extra';
 import path from 'path';
@@ -102,11 +103,12 @@ export async function getDockContents(dockXmlPlist) {
     });
 
     const appNamesToIconPaths = getAppNamesToIconPaths(parsedDockData);
+    const appNames = Object.keys(appNamesToIconPaths);
     console.log('Found the following persistent apps in your dock:')
-    console.log(Object.keys(appNamesToIconPaths));
+    console.log(appNames);
 
     const appNamesNeedingIconsUploaded = await getWhichAppNamesNeedIconsUploaded(
-        Object.keys(appNamesToIconPaths)
+        appNames
     );
     console.log('Of these, the following will be uploaded:');
     console.log(appNamesNeedingIconsUploaded);
@@ -147,6 +149,10 @@ export async function getDockContents(dockXmlPlist) {
 
         // Output message saying that upload is complete
         console.log('Dock scan complete!');
+
+        const dockhuntUrl = `https://dockhunt.com/new-dock?${appNames.map(appName => `app=${encodeURIComponent(appName)}`).join('&')}`;
+        console.log(`Redirecting to ${dockhuntUrl}`);
+        await open(dockhuntUrl);
     } catch (error) {
         console.error("Error converting icons to pngs:", error);
     }
