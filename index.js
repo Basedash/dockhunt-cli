@@ -110,11 +110,11 @@ export async function getDockContents(dockXmlPlist) {
         console.log(`•  ${name}`);
     }
 
+    console.log('\nUploading missing dock icons to dockhunt...');
 
     const appNamesNeedingIconsUploaded = await getWhichAppNamesNeedIconsUploaded(
         appNames
     );
-    console.log('\nOf these, the following will be uploaded:');
     for (const name of appNamesNeedingIconsUploaded) {
         console.log(`•  ${name}`);
     }
@@ -123,7 +123,6 @@ export async function getDockContents(dockXmlPlist) {
     // Make a temporary dir for converted images
     const tempDirname = `temp_${Date.now()}_icon_conversion`;
     const tempDir = path.join(path.dirname(url.fileURLToPath(import.meta.url)), tempDirname);
-    console.log('\nCreating temporary directory for converted icons:\n', tempDir);
     fs.mkdirSync(tempDir);
 
     const appIconsBeingUploadedPromises = [];
@@ -133,7 +132,6 @@ export async function getDockContents(dockXmlPlist) {
         if (iconPath) {
             appIconsBeingUploadedPromises.push(icns2png(appName, iconPath, tempDir));
         } else {
-            //console.warn('No icon found for app:', appName);
             console.warn(`No icon found          (${appName})`);
         }
     }
@@ -163,7 +161,7 @@ export async function getDockContents(dockXmlPlist) {
         console.log('\nDock scan complete!');
 
         const dockhuntUrl = `https://dockhunt.com/new-dock?${appNames.map(appName => `app=${encodeURIComponent(appName)}`).join('&')}`;
-        console.log(`\nRedirecting to ${dockhuntUrl}`);
+        console.log(`\nRedirecting to dockhunt (${dockhuntUrl})`);
         await open(dockhuntUrl);
     } catch (error) {
         console.error("Error converting icons to pngs:", error);
