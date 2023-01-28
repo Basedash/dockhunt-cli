@@ -22,6 +22,7 @@ function isAppNameAllowed(appName) {
     // Finder doesn't seem to appear in the dock data
     const disallowedAppNames = [
         'Preview',
+        'Launchpad'
     ];
     return !disallowedAppNames.includes(appName);
 }
@@ -104,20 +105,25 @@ export async function getDockContents(dockXmlPlist) {
 
     const appNamesToIconPaths = getAppNamesToIconPaths(parsedDockData);
     const appNames = Object.keys(appNamesToIconPaths);
-    console.log('Found the following persistent apps in your dock:')
-    console.log(appNames);
+    console.log('Found the following persistent apps in your dock:\n')
+    for (const name of appNames) {
+        console.log(`•  ${name}`);
+    }
+
 
     const appNamesNeedingIconsUploaded = await getWhichAppNamesNeedIconsUploaded(
         appNames
     );
-    console.log('Of these, the following will be uploaded:');
-    console.log(appNamesNeedingIconsUploaded);
+    console.log('\nOf these, the following will be uploaded:');
+    for (const name of appNamesNeedingIconsUploaded) {
+        console.log(`•  ${name}`);
+    }
 
 
     // Make a temporary dir for converted images
     const tempDirname = `temp_${Date.now()}_icon_conversion`;
     const tempDir = path.join(path.dirname(url.fileURLToPath(import.meta.url)), tempDirname);
-    console.log('Creating temporary directory for converted icons:\n', tempDir, '\n');
+    console.log('\nCreating temporary directory for converted icons:\n', tempDir);
     fs.mkdirSync(tempDir);
 
     const appIconsBeingUploadedPromises = [];
@@ -134,7 +140,13 @@ export async function getDockContents(dockXmlPlist) {
 
     try {
         const appIconsUploaded = await Promise.all(appIconsBeingUploadedPromises);
-        console.log('Converted icons to pngs:', appIconsUploaded);
+
+        if (appIconsUploaded.length > 0) {
+            console.log('\nConverted icons to pngs:\n');
+            for (const appIconUploaded of appIconsUploaded) {
+                console.log(`•  ${appIconUploaded.appName}`);
+            }
+        }
 
         const appIconUploadPromises = [];
         for (const appIcon of appIconsUploaded) {
@@ -148,10 +160,10 @@ export async function getDockContents(dockXmlPlist) {
         fs.removeSync(tempDir)
 
         // Output message saying that upload is complete
-        console.log('Dock scan complete!');
+        console.log('\nDock scan complete!');
 
         const dockhuntUrl = `https://dockhunt.com/new-dock?${appNames.map(appName => `app=${encodeURIComponent(appName)}`).join('&')}`;
-        console.log(`Redirecting to ${dockhuntUrl}`);
+        console.log(`\nRedirecting to ${dockhuntUrl}`);
         await open(dockhuntUrl);
     } catch (error) {
         console.error("Error converting icons to pngs:", error);
