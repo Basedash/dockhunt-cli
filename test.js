@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 
-import fetch from 'node-fetch';
-import fs from 'fs';
+import fetch, {FormData, fileFrom} from 'node-fetch';
 
-const URL = 'http://dockhunt.com/api/cli/icon-upload';
-const iconPath = '/Users/jbs/projects/dockhunt-cli/temp_1674861422483_icon_conversion/Basedash Development.png';
+const URL = 'https://dockhunt.com/api/cli/icon-upload';
+// const URL = 'http://localhost:3000/api/cli/icon-upload';
+const iconPath = '/Users/robertcooper/Projects/dockhunt-cli/temp_1674880185748_icon_conversion/TablePlus.png';
 
-const params = new URLSearchParams();
-params.append('app', 'Basedash Development');
-params.append('icon', fs.readFileSync(iconPath));
+const form = new FormData();
+
+form.append('app', 'TablePlus');
+form.append('icon', await fileFrom(iconPath));
 
 const response = await fetch(URL, {
   method: 'POST',
-  body: params,
+  body: form,
 });
 
-console.log(response);
 const data = await response.json()
 console.log(data);
