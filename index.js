@@ -170,7 +170,7 @@ export async function getDockContents(dockXmlPlist) {
         const dockhuntUrl = `https://dockhunt.com/new-dock?${appNames.map(appName => `app=${encodeURIComponent(appName)}`).join('&')}`;
         // const dockhuntUrl = `http://localhost:3000/new-dock?${appNames.map(appName => `app=${encodeURIComponent(appName)}`).join('&')}`;
         console.log(`\nRedirecting to dockhunt (${dockhuntUrl})`);
-        // await open(dockhuntUrl);
+        await open(dockhuntUrl);
     } catch (error) {
         console.error("Error converting icons to pngs:", error);
     }
