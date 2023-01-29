@@ -130,7 +130,7 @@ export async function getDockContents(dockXmlPlist) {
 
     // Make a temporary dir for converted images
     const tempDirname = `temp_${Date.now()}_icon_conversion`;
-    const tempDir = path.join(path.dirname(url.fileURLToPath(import.meta.url)), tempDirname);
+    const tempDir = path.join(process.cwd(), tempDirname);
     fs.mkdirSync(tempDir);
 
     /** @type {Promise<{iconPath: string | null, appName: string}>[]} */

@@ -1,6 +1,6 @@
 {
   "name": "dockhunt",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Share which apps you have in your macOS dock with Dockhunt.",
   "os": [
     "darwin"
@@ -8,11 +8,11 @@
   "type": "module",
   "main": "index.js",
   "bin": {
-    "dockhunt": "./cli.sh",
-    "share-dock": "./share-dock.js"
+    "dockhunt": "./dist/entrypoint.cjs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepublishOnly": "npm run package",
+    "package": "rollup --config && pkg --targets macos --output dockhunt ./dist/entrypoint.cjs"
   },
   "repository": {
     "type": "git",
@@ -29,5 +29,11 @@
     "node-fetch": "^3.3.0",
     "open": "^8.4.0",
     "xml2js": "^0.4.23"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "pkg": "^5.8.0",
+    "rollup": "^3.12.0"
   }
 }
