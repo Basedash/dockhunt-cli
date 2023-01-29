@@ -11,6 +11,7 @@
     "dockhunt": "./dist/entrypoint.cjs"
   },
   "scripts": {
+    "prepublishOnly": "npm run build",
     "build": "rollup --config",
     "package": "npm run build && pkg --targets macos --output dockhunt ./dist/entrypoint.cjs"
   },
