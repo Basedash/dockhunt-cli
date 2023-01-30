@@ -2,3 +2,4 @@
 dockhunt
 .idea
 dist
+rollup.config.js
