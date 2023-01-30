@@ -1,2 +1,4 @@
 # Ignores the executable
 dockhunt
+.idea
+dist
