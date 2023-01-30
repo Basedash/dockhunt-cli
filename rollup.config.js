@@ -3,7 +3,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import shebang from 'rollup-plugin-preserve-shebang';
 
 export default {
-    input: 'entrypoint.js',
+    input: 'index.js',
     output: {
         format: 'cjs',
         dir: 'dist',
