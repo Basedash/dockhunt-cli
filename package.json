@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build": "rm -rf dist && rollup --config",
-    "package": "npm run build && pkg --targets macos --output dockhunt ./dist/index.cjs"
+    "package": "npm run build && pkg --targets node16-macos-x64 --output dockhunt ./dist/index.cjs"
   },
   "repository": {
     "type": "git",
