@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import child_process from 'child_process';
-import {getDockContents} from "./utils.js";
+import {scanDockAndBringToWebApp} from "./utils.js";
 
 // Entry point for the Dockhunt CLI
 
@@ -21,5 +21,5 @@ child_process.exec('defaults export com.apple.dock -', (error, stdout, stderr) =
     }
 
 
-    getDockContents(stdout);
+    scanDockAndBringToWebApp(stdout);
 })
