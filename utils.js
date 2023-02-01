@@ -66,6 +66,8 @@ async function getWhichAppsAreMissingFromDatabase(appNames) {
 
 function getIconPath(appDirectory) {
     var appResourcesDirectory = path.join(appDirectory, 'Contents', 'Resources');
+    // AppName.app/Contents/Resources may not exist for Catalyst apps.
+    if (!fs.pathExistsSync(appResourcesDirectory)) return null
     const files = fs.readdirSync(appResourcesDirectory)
     for (const file of files) {
         if (file.endsWith('.icns')) {
