@@ -37,10 +37,9 @@ function getAppNamesToIconPaths(parsedDockData) {
 
     for (const parsedAppData of persistentApps ?? []) {
         const appName = parsedAppData.dict[0].string[1];
-        const appDirectoryUrl = parsedAppData.dict[0].dict[0].string[0];
-        const appDirectory = url.fileURLToPath(appDirectoryUrl)
-
-        if (isAppNameAllowed(appName)) {
+        const appDirectoryUrl = parsedAppData.dict[0].dict?.[0].string[0];
+        if (appDirectoryUrl && isAppNameAllowed(appName)) {
+            const appDirectory = url.fileURLToPath(appDirectoryUrl)
             result[appName] = getIconPath(appDirectory);
         }
     }
@@ -70,6 +69,8 @@ async function getWhichAppsAreMissingFromDatabase(appNames) {
 
 function getIconPath(appDirectory) {
     var appResourcesDirectory = path.join(appDirectory, 'Contents', 'Resources');
+    // AppName.app/Contents/Resources may not exist for Catalyst apps.
+    if (!fs.pathExistsSync(appResourcesDirectory)) return null
     const files = fs.readdirSync(appResourcesDirectory)
     for (const file of files) {
         if (file.endsWith('.icns')) {
