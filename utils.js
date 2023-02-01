@@ -38,9 +38,10 @@ function getAppNamesToIconPaths(parsedDockData) {
     for (const parsedAppData of persistentApps ?? []) {
         const appName = parsedAppData.dict[0].string[1];
         const appDirectoryUrl = parsedAppData.dict[0].dict?.[0].string[0];
+
         if (appDirectoryUrl && isAppNameAllowed(appName)) {
             const appDirectory = url.fileURLToPath(appDirectoryUrl)
-            result[appName] = getIconPath(appDirectory);
+            result[appName] = getIconPath(appDirectory) || getIconPathForCatalystApp(appDirectory);
         }
     }
     return result;
@@ -78,6 +79,29 @@ function getIconPath(appDirectory) {
         }
     }
     return null;
+}
+
+/**
+ * Returns path to icon for a Catalyst app
+ * @param appDirectory
+ * @return {string|null}
+ */
+function getIconPathForCatalystApp(appDirectory)  {
+    const bundleDirectory = path.join(appDirectory, 'Wrapper', path.basename(appDirectory));
+    if (!fs.pathExistsSync(bundleDirectory)) return null;
+    let largestIcon = {size: 0, fileName: null}
+    fs.readdirSync(bundleDirectory).forEach(fileName => {
+        // 'AppIcon60x60@2x.png' -> groups: { size: '60' }
+        // 'AppIcon76x76@2x~ipad.png' -> groups: { size: '76' }
+        const match = fileName.match(/AppIcon(?<size>\d+)x\d+.*.png/);
+        if (match && match.groups.size && parseInt(match.groups.size) > largestIcon.size) {
+            largestIcon = {
+                size: match.groups.size,
+                fileName: path.join(bundleDirectory, fileName)
+            }
+        }
+    })
+    return largestIcon.fileName;
 }
 
 /**
