@@ -130,7 +130,7 @@ export function icns2png(appName, icnsPath, outputDir) {
     });
 }
 
-export async function getDockContents(dockXmlPlist) {
+export async function scanDockAndBringToWebApp(dockXmlPlist) {
     if (!dockXmlPlist.match(/<!DOCTYPE plist/g)) {
         throw 'Dock data appears to be invalid. Expected: Apple plist XML.';
     }
