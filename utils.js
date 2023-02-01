@@ -35,7 +35,7 @@ function getAppNamesToIconPaths(parsedDockData) {
 
     const result = {};
 
-    for (const parsedAppData of persistentApps) {
+    for (const parsedAppData of persistentApps ?? []) {
         const appName = parsedAppData.dict[0].string[1];
         const appDirectoryUrl = parsedAppData.dict[0].dict[0].string[0];
         const appDirectory = url.fileURLToPath(appDirectoryUrl)
@@ -53,6 +53,9 @@ function getAppNamesToIconPaths(parsedDockData) {
  * @returns {Promise<Array.<{name: string; foundInDb: boolean; missingAppIcon: boolean}>>}
  */
 async function getWhichAppsAreMissingFromDatabase(appNames) {
+    if (!appNames.length) {
+      return [];
+    }
     const queryString = querystring.stringify({app: appNames});
     const url = `https://www.dockhunt.com/api/cli/check-apps?${queryString}`;
     // const url = `http://localhost:3000/api/cli/check-apps?${queryString}`;
@@ -143,27 +146,35 @@ export async function scanDockAndBringToWebApp(dockXmlPlist) {
 
     const appNamesToIconPaths = getAppNamesToIconPaths(parsedDockData);
     const appNames = Object.keys(appNamesToIconPaths);
-    console.log('Found the following pinned apps in your dock:\n')
-    for (const name of appNames) {
-        console.log(`•  ${name}`);
+
+    if (appNames.length) {
+      console.log('Found the following pinned apps in your dock:\n')
+      for (const name of appNames) {
+          console.log(`•  ${name}`);
+      }
+    } else {
+      console.log('Found what appears to be an empty dock.');
     }
 
     // console.log('\nUploading missing dock icons to dockhunt...');
 
-    const missingAppInformation = await getWhichAppsAreMissingFromDatabase(
+    const appsMissingFromDatabase = await getWhichAppsAreMissingFromDatabase(
         appNames
     );
 
 
     // Make a temporary dir for converted images
-    const tempDirname = `temp_${Date.now()}_icon_conversion`;
-    const tempDir = path.join(process.cwd(), tempDirname);
-    fs.mkdirSync(tempDir);
+    let tempDir;
+    if (appsMissingFromDatabase.length) {
+      const tempDirname = `temp_${Date.now()}_icon_conversion`;
+      tempDir = path.join(process.cwd(), tempDirname);
+      fs.mkdirSync(tempDir);
+    }
 
     /** @type {Promise<{iconPath: string | null, appName: string}>[]} */
     const missingAppsToBeAddedToDatabasePromises = [];
 
-    for (const app of missingAppInformation) {
+    for (const app of appsMissingFromDatabase) {
         const iconPath = appNamesToIconPaths[app.name];
         if (!iconPath) {
             console.warn(`\n${app.name} icon not found.`);
@@ -192,15 +203,23 @@ export async function scanDockAndBringToWebApp(dockXmlPlist) {
         await Promise.all(appIconUploadPromises);
 
         // Remove temporary directory
-        fs.removeSync(tempDir)
+        if (tempDir) {
+          fs.removeSync(tempDir)
+        }
 
         // Output message saying that upload is complete
         console.log('\nDock scan complete!');
 
-        const dockhuntUrl = `https://dockhunt.com/new-dock?${appNames.map(appName => `app=${encodeURIComponent(appName)}`).join('&')}`;
-        // const dockhuntUrl = `http://localhost:3000/new-dock?${appNames.map(appName => `app=${encodeURIComponent(appName)}`).join('&')}`;
-        console.log(`\nRedirecting to dockhunt: ${dockhuntUrl}`);
-        await open(dockhuntUrl);
+        if (appNames.length) {
+          const dockhuntUrl = `https://dockhunt.com/new-dock?${appNames.map(appName => `app=${encodeURIComponent(appName)}`).join('&')}`;
+          // const dockhuntUrl = `http://localhost:3000/new-dock?${appNames.map(appName => `app=${encodeURIComponent(appName)}`).join('&')}`;
+
+          console.log(`\nRedirecting to dockhunt: ${dockhuntUrl}`);
+          await open(dockhuntUrl);
+        } else {
+          console.log('\nDockhunt does not currently support users making ' +
+            'Docks which contain no apps.');
+        }
     } catch (error) {
         console.error("Error converting icons to pngs:", error);
     }
