@@ -37,12 +37,16 @@ function getAppNamesToIconPaths(parsedDockData) {
 
     for (const parsedAppData of persistentApps ?? []) {
         const appName = parsedAppData.dict[0].string[1];
-        const appDirectoryUrl = parsedAppData.dict[0].dict[0].string[0];
-        const appDirectory = url.fileURLToPath(appDirectoryUrl)
-
-        if (isAppNameAllowed(appName)) {
-            result[appName] = getIconPath(appDirectory);
+        if(Array.isArray(parsedAppData.dict[0].dict)) {
+            const appDirectoryUrl = parsedAppData.dict[0].dict[0].string[0];
+            const appDirectory = url.fileURLToPath(appDirectoryUrl)
+            if (isAppNameAllowed(appName)) {
+                result[appName] = getIconPath(appDirectory);
+            }
+        } else if(parsedAppData.key.includes('tile-type')) {
+            // TODO: implement spacers
         }
+        
     }
     return result;
 }
