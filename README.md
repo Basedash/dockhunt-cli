@@ -8,7 +8,7 @@ Dockhunt.
 [![Dockhunt - Discover the apps everyone is docking about](https://user-images.githubusercontent.com/15393239/215352336-3a2e63e2-b474-45a9-9721-160cecb83325.png)](https://www.dockhunt.com)
 
 
-This repositofy is for the CLI tool. The resposity for the Dockhunt web
+This repository is for the CLI tool. The resposity for the Dockhunt web
 application is: [https://github.com/Basedash/dockhunt](https://github.com/Basedash/dockhunt)
 
 ## Usage
