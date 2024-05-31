@@ -7,8 +7,7 @@ import path from 'path';
 import querystring from 'querystring';
 import url from 'url';
 import util from 'util';
-
-import {parseString} from 'xml2js';
+import plist from 'plist';
 
 function logWithInspect(object) {
     // https://stackoverflow.com/a/10729284/15487978
@@ -24,26 +23,28 @@ function isAppNameAllowed(appName) {
     return !disallowedAppNames.includes(appName);
 }
 
-function getAppNamesToIconPaths(parsedDockData) {
-    const parsedAppData = parsedDockData.plist.dict[0]
+function parseDockData(rawDockPlist) {
+    return plist.parse(rawDockPlist);
+}
 
-    //logWithInspect(parsedAppData);
+function getAppNamesWithIconPaths(parsedDockData) {
+    //logWithInspect(parsedDockData);
 
-    const persistentApps = parsedAppData.array[1].dict;
-    const _persistentOthers = parsedAppData.array[2].dict;
-    const _recentApps = parsedAppData.array[3].dict;
+    const persistentApps = parsedDockData['persistent-apps'] ?? [];
+    const persistentAppsWithoutSpacers = persistentApps.filter(item => item['tile-type'] === 'file-tile');
+    const appNamesWithIconPaths = {};
 
-    const result = {};
+    for (const app of persistentAppsWithoutSpacers) {
+        const appName = app['tile-data']?.['file-label'];
+        const appDirectoryUrl = app['tile-data']?.['file-data']?.['_CFURLString'];
 
-    for (const parsedAppData of persistentApps ?? []) {
-        const appName = parsedAppData.dict[0].string[1];
-        const appDirectoryUrl = parsedAppData.dict[0].dict?.[0].string[0];
         if (appDirectoryUrl && isAppNameAllowed(appName)) {
             const appDirectory = url.fileURLToPath(appDirectoryUrl)
-            result[appName] = getIconPath(appDirectory);
+            appNamesWithIconPaths[appName] = getIconPath(appDirectory);
         }
     }
-    return result;
+
+    return appNamesWithIconPaths;
 }
 
 /**
@@ -139,14 +140,9 @@ export async function scanDockAndBringToWebApp(dockXmlPlist) {
         throw 'Dock data appears to be invalid. Expected: Apple plist XML.';
     }
 
-    const parsedDockData = await new Promise((resolve, reject) => {
-        parseString(dockXmlPlist, function (error, result) {
-            return error ? reject(error) : resolve(result);
-        });
-    });
-
-    const appNamesToIconPaths = getAppNamesToIconPaths(parsedDockData);
-    const appNames = Object.keys(appNamesToIconPaths);
+    const parsedDockData = parseDockData(dockXmlPlist);
+    const appNamesWithIconPaths = getAppNamesWithIconPaths(parsedDockData);
+    const appNames = Object.keys(appNamesWithIconPaths);
 
     if (appNames.length) {
       console.log('Found the following pinned apps in your dock:\n')
